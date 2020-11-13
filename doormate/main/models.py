@@ -11,3 +11,9 @@ class AuthInfo(models.Model):
 class Calendars(models.Model):
     calendar_id = models.CharField(max_length=200)
     name = models.CharField(max_length=200)
+
+class Events(models.Model):
+    name = models.CharField(max_length=200)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    status = models.CharField(max_length=200)
