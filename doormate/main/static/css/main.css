@@ -1,0 +1,75 @@
+/* start home */
+#home {
+    background: url('../images/background.png') 100% 100% no-repeat;
+    background-size: cover;
+    padding-top: 250px;
+    min-height: 650px;
+    min-width: 100%;
+}
+
+#home h1 {
+    font-weight: 300;
+    font-size: 70px;
+    padding-bottom: 10px;
+}
+
+.element {
+    height: 60px;
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--white);
+}
+
+.errorImage {
+    height: 20px;
+    margin-right: 5px;
+}
+
+@media only screen and (max-width: 600px) {
+    #home {
+        background: url('../images/background.png') 100% 100% no-repeat;
+        background-size: cover;
+        padding-top: 100px;
+        min-height: 450px;
+        width: 100%;
+    }
+
+    .homeContent {
+        margin-bottom: 300px;
+        text-align: center;
+    }
+
+    .sub-elemet {
+        text-align: center;
+    }
+}
+
+/* end home */
+/* Responsive iFrame */
+.responsive-iframe-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    padding-top: 30px;
+    height: 0;
+    overflow: hidden;
+}
+
+.responsive-iframe-container iframe,
+.vresponsive-iframe-container object,
+.vresponsive-iframe-container embed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+</style >
+/*Footer Styling*/
+
+footer {
+    padding-top: 30px;
+    padding-bottom: 20px;
+    align-content: center;
+    text-align: center;
+}
