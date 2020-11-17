@@ -18,6 +18,7 @@ googleapis-common-protos==1.52.0  # via google-api-core
 httplib2==0.18.1          # via google-api-python-client, google-auth-httplib2
 idna==2.10                # via requests
 oauthlib==3.1.0           # via requests-oauthlib
+paho-mqtt==1.5.1          # via -r requirements.in
 protobuf==3.13.0          # via google-api-core, googleapis-common-protos
 pyasn1-modules==0.2.8     # via google-auth
 pyasn1==0.4.8             # via pyasn1-modules, rsa
