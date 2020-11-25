@@ -1,0 +1,19 @@
+{
+  "name": "electron_app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^11.0.3",
+    "electron-rebuild": "^2.3.2"
+  },
+  "dependencies": {
+    "mdns": "^2.7.2"
+  }
+}
