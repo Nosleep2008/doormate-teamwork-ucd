@@ -12,7 +12,9 @@ class Calendars(models.Model):
     calendar_id = models.CharField(max_length=200)
     name = models.CharField(max_length=200)
 
+
 class Events(models.Model):
+    summary = models.CharField(max_length=200,primary_key=True)
     name = models.CharField(max_length=200)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()

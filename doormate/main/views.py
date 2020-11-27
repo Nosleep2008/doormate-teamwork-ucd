@@ -9,10 +9,13 @@ from google_auth_oauthlib.flow import Flow
 from django.core.exceptions import PermissionDenied
 from main.utils import list_calendars, list_events, build_google_service, get_user_profile
 from datetime import datetime
+import telepot
 import time
 
 
 # Create your views here.
+TOKEN = '1300396895:AAF2b0Ync9M5uLmZTYtrihJ0aQaUbvL-s9Q'
+bot = telepot.Bot(TOKEN)
 
 flow = Flow.from_client_secrets_file(
     './doormate/credentials.json',
@@ -57,12 +60,12 @@ def google_auth_code_handler(request):
 def index(request):
     return render(request, "index.html")
 
-def insert_event(request,name,start_time,end_time,status):
+def insert_event(request,summary,name,start_time,end_time,status):
     start = datetime.strptime(start_time,'%Y-%m-%d %H:%M').astimezone()
     end = datetime.strptime(end_time, '%Y-%m-%d %H:%M').astimezone()
-   # end=datetime.strptime(end_time,'%Y-%m-%d %H:%M').replace(tzinfo=timezone(timedelta(hours=8)))
 
     Events.objects.create(
+        summary=summary,
         name=name,
         start_time=start,
         end_time=end,
@@ -84,7 +87,7 @@ def get_event(request,time):
     current =  datetime.strptime(time, '%Y-%m-%d %H:%M').astimezone()
     events = Events.objects.filter(start_time__lte=current).filter(end_time__gte=current).order_by("start_time")
     result = {}
-    print(list(events.values()))
+    #print(list(events.values()))
     result["events"] = list(events.values())
     return JsonResponse(result)
 
@@ -93,21 +96,35 @@ def next_event(request,time):
     result={}
     events=Events.objects.filter(start_time__gte=current).order_by("start_time")
     result["next"]= list(events.values())[0]
-    print(result["next"])
+    #print(result["next"])
     return JsonResponse(result)
 
-def del_event(request,id):
-    Events.objects.filter(id=id).delete()
+def del_event(request,summary):
+    Events.objects.get(summary=summary).delete()
     return  HttpResponse("Delete success")
 
 
-def update_event(request,id,name,start_time,end_time,status):
+def update_event(request,summary,name,start_time,end_time,status):
+    events = Events.objects.filter(summary=summary)
     start = datetime.strptime(start_time, '%Y-%m-%d %H:%M').astimezone()
     end = datetime.strptime(end_time, '%Y-%m-%d %H:%M').astimezone()
-    event = Events.objects.get(id=id)
-    event.name = name
-    event.start_time = start
-    event.end_time = end
-    event.status = status
-    event.save()
+    if events.exists():
+        event = Events.objects.get(summary=summary)
+        event.name = name
+        event.start_time = start
+        event.end_time = end
+        event.status = status
+        event.save()
+    else:
+        Events.objects.create(
+            summary=summary,
+            name=name,
+            start_time=start,
+            end_time=end,
+            status=status
+        )
     return HttpResponse("Update success")
+
+def telegram_message(request,chat_id, text):
+    print(bot.getMe())
+    bot.sendMessage(chat_id, text)
