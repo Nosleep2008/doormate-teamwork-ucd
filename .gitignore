@@ -133,3 +133,6 @@ dmypy.json
 
 # Google Creds
 credentials.json
+
+# Node Modules
+node_modules

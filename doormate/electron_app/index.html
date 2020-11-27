@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Loader from https://www.w3schools.com/howto/howto_css_loader.asp */
+        .loader {
+          margin: 0 auto;
+          border: 16px solid #f3f3f3;
+          border-radius: 50%;
+          border-top: 16px solid #3498db;
+          width: 60px;
+          height: 60px;
+          -webkit-animation: spin 2s linear infinite; /* Safari */
+          animation: spin 2s linear infinite;
+        }
+        
+        /* Safari */
+        @-webkit-keyframes spin {
+          0% { -webkit-transform: rotate(0deg); }
+          100% { -webkit-transform: rotate(360deg); }
+        }
+        
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>DoorMate</title>
+    <script>
+        var services = []
+        var ipcRenderer = require('electron').ipcRenderer;
+        ipcRenderer.on('service', function (event, service) {
+            for (var i=0; i<services.length; i++) {
+                var exists = false;
+                if (services[i].addresses[0] == service.addresses[0]) {
+                    exists = true;
+                }
+            }
+            if (!exists) {
+                services.push(service)
+                document.getElementById("spinner").style.display = "none";
+                document.getElementById("spinner-text").style.display = "none";
+                list = document.getElementById("services-list");
+                var nodeService = document.createElement("button");
+                var textnode = document.createTextNode(service.name + " (" + service.addresses[0] + ")");
+                nodeService.appendChild(textnode);
+                nodeService.addEventListener('click', function() {
+                    ipcRenderer.send('open-tab', "http://" + service.addresses[0] + ":" + service.port);
+                });
+                list.appendChild(nodeService);
+            }
+        });
+    </script>
+</head>
+<body style="background: white;">
+    <div style="display: flex; justify-content: center; margin-top: 100px;">
+        <div>
+            <div id="spinner" class="loader"></div>
+            <span id="spinner-text" style="text-align: center; font-weight: bold;">Scanning your network...</span>
+            <ul id="services-list"/>
+        </div>
+    </div>
+</body>
+</html>
