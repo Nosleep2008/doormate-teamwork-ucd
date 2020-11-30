@@ -1,24 +1,30 @@
+import json
 import time
-from datetime import datetime
-#from paho import mqtt
-from doormate.main.Event_Util import old_event, show_event, update_event
-from doormate.main.utils import list_events
+from datetime import datetime, timedelta
+
 import paho.mqtt.client as mqtt
+import pytz
+from apscheduler.schedulers.background import BlockingScheduler
+
+#from paho import mqtt
+from main.Event_Util import old_event, show_event, update_event
+from main.utils import list_events
+
 
 class event_fetcher:
     service = ''
-    calender = 'primary'
+    calendar = 'primary'
     client = ''
 
     # time_limit is the lifetime of event_fetcher
-    def __init__(self, google_service, calender="primary", time_limit=60 * 6 * 144):
+    def __init__(self, google_service, scheduler: BlockingScheduler, calendar="primary", time_limit=60 * 6 * 144):
         self.service = google_service
-        self.calender = calender
-        self.update_database(self)  # initial database
+        self.calendar = calendar
+        self.scheduler = scheduler
+        self.update_database()  # initial database
         self.client = self.establish_message_broker()  # establish connection with mqtt server
         # start to watching new events from google (every 2 min) and refresh display (every 10s)
         # self.run(time_limit)
-        self.client.disconnect()
 
     '''
     def run(self, time_limit):
@@ -33,27 +39,43 @@ class event_fetcher:
     '''
 
     def get_events_from_api(self):
-        res = list_events(self.service, self.calender)
+        res = list_events(self.service, self.calendar)
         return res["items"]
 
     def clear_passed_events(self):
         now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         old_event(now)
 
-    def display_current_event(self, hour=1):
-        now = datetime.datetime.now()
-        offset = datetime.timedelta(hours=2)
-        further_hours = (now + offset).strftime('%Y-%m-%d %H:%M:%S')
-        events = show_event(now, further_hours)  # return json information , only need the first one (currently)
-        self.publish_message(events[0])  # pass the first one to message broker function
+    def display_current_event(self, summary, end_time):
+        print("Sending current event...")
+        event = {"name": summary, "datetime": end_time}
+        self.publish_message(json.dumps(event))
 
     def update_database(self):
         events_list = self.get_events_from_api()
+        print("Updating Events DB...")
+        first = True
         for event in events_list:
+            print("Adding event to DB")
             summary = event["summary"]
-            start_time = event["start"]["datetime"]
-            end_time = event["end"]["datetime"]
+            start_time = datetime.strptime(event["start"]["dateTime"], '%Y-%m-%dT%H:%M:%S%z').astimezone(pytz.utc)
+            end_time = datetime.strptime(event["end"]["dateTime"], '%Y-%m-%dT%H:%M:%S%z').astimezone(pytz.utc)
             status = event["status"]
+            if first:
+                first = False
+
+                message_datetime = start_time
+                if start_time < datetime.utcnow().astimezone(pytz.utc):
+                    message_datetime = datetime.now() + timedelta(seconds=5)
+
+                self.scheduler.add_job(
+                    self.display_current_event,
+                    id="display_current_event",
+                    replace_existing=True,
+                    trigger='date',
+                    run_date=message_datetime,
+                    args=(summary, end_time))
+
             update_event("r", summary, summary, start_time, end_time, status)
 
     def establish_message_broker(self):
@@ -64,4 +86,4 @@ class event_fetcher:
     def publish_message(self, event):
         # Publish MQTT message for parameter event
         if not self.client == '':
-            self.client.publish(topic="event", payload=event, qos=0)
+            self.client.publish(topic="event", payload=event, qos=1)

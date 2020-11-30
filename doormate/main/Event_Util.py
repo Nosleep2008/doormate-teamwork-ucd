@@ -1,12 +1,13 @@
-from django.http import HttpResponse
-from main.models import Events
-from datetime import datetime
 import json
+from datetime import datetime
+
+from django.http import HttpResponse
+
+from main.models import Events
+
 
 def show_event(start_time,end_time):
-    start = datetime.strptime(start_time, '%Y-%m-%d %H:%M').astimezone()
-    end = datetime.strptime(end_time, '%Y-%m-%d %H:%M').astimezone()
-    events = Events.objects.filter(start_time__gte=start).filter(end_time__lte=end).order_by("start_time")
+    events = Events.objects.filter(start_time__gte=start_time).filter(end_time__lte=end_time).order_by("start_time")
     result={}
     result["events"]=list(events.values())
     return json.dumps(result)
@@ -35,21 +36,19 @@ def del_event(summary):
 
 def update_event(request,summary,name,start_time,end_time,status):
     events = Events.objects.filter(summary=summary)
-    start = datetime.strptime(start_time, '%Y-%m-%d %H:%M').astimezone()
-    end = datetime.strptime(end_time, '%Y-%m-%d %H:%M').astimezone()
     if events.exists():
         event = Events.objects.get(summary=summary)
         event.name = name
-        event.start_time = start
-        event.end_time = end
+        event.start_time = start_time
+        event.end_time = end_time
         event.status = status
         event.save()
     else:
         Events.objects.create(
             summary=summary,
             name=name,
-            start_time=start,
-            end_time=end,
+            start_time=start_time,
+            end_time=end_time,
             status=status
         )
     print("Update success")

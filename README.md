@@ -13,8 +13,14 @@
 - `python doormate/manage.py makemigrations main`
 - `python doormate/manage.py migrate main`
 
-## Run
+## Run Mosquitto
+- docker: `docker run -it --name mosquitto -p 1883:1883 eclipse-mosquitto`
+
+## Run Configuration Server
 - `python doormate/manage.py runserver 0.0.0.0:8000`
+
+## Run Scheduler (Django Command)
+- `python doormate/manage.py scheduler`
 
 ## Add a library
 - Add library name to requirements.in (or requirement_dev.in)
