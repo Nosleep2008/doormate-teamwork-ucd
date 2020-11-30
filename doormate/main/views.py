@@ -48,12 +48,20 @@ def google_auth_code_handler(request):
 
     google_service = build_google_service(flow.credentials)
     calendars = list_calendars(google_service)
+
+    if AuthInfo.objects.count() == 1:
+        auth_info = AuthInfo.objects.first()
+        auth_info.email = profile["email"]
+        auth_info.access_token = profile["access_token"]
+        auth_info.refresh_token = profile["refresh_token"]
+        auth_info.token_type = profile["token_type"]
+    else:
    
-    AuthInfo.objects.create(
-        email=profile["email"],
-        access_token=token["access_token"],
-        refresh_token=token["refresh_token"],
-        token_type=token["token_type"])
+        AuthInfo.objects.create(
+            email=profile["email"],
+            access_token=token["access_token"],
+            refresh_token=token["refresh_token"],
+            token_type=token["token_type"])
 
     return render(request, "index.html", {"form": CalendarsForm(calendars)})
 
