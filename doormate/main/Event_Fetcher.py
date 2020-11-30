@@ -1,9 +1,9 @@
 import time
-
-from paho import mqtt
+from datetime import datetime
+#from paho import mqtt
 from doormate.main.Event_Util import old_event, show_event, update_event
 from doormate.main.utils import list_events
-
+import paho.mqtt.client as mqtt
 
 class event_fetcher:
     service = ''
@@ -41,8 +41,9 @@ class event_fetcher:
         old_event(now)
 
     def display_current_event(self, hour=1):
-        now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-        further_hours = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()) + time.timedelta(hours=hour))
+        now = datetime.datetime.now()
+        offset = datetime.timedelta(hours=2)
+        further_hours = (now + offset).strftime('%Y-%m-%d %H:%M:%S')
         events = show_event(now, further_hours)  # return json information , only need the first one (currently)
         self.publish_message(events[0])  # pass the first one to message broker function
 
@@ -56,7 +57,6 @@ class event_fetcher:
             update_event("r", summary, summary, start_time, end_time, status)
 
     def establish_message_broker(self):
-        mqtt.Client()
         client = mqtt.Client(protocol=3)
         client.connect(host="127.0.0.1", port=1883, keepalive=60)
         return client
