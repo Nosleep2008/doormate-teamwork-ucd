@@ -1,10 +1,21 @@
 /* start home */
 #home {
-    background: url('../images/background.png') 100% 100% no-repeat;
+    background-image: url('../images/background.png');
+    background-repeat: no-repeat;
     background-size: cover;
-    padding-top: 250px;
+    padding-top: 100px;
     min-height: 650px;
     min-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.homeContent {
+    padding: 30px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
 }
 
 #home h1 {
@@ -35,8 +46,12 @@
     }
 
     .homeContent {
+        padding: 30px;
         margin-bottom: 300px;
         text-align: center;
+        background-color: rgba(255, 255, 255, 0.3);
+        border: 5px solid rgba(255, 255, 255, 0.3);
+        border-radius: 5px;
     }
 
     .sub-elemet {
@@ -64,12 +79,17 @@
     height: 100%;
 }
 
-</style >
-/*Footer Styling*/
-
 footer {
     padding-top: 30px;
     padding-bottom: 20px;
     align-content: center;
     text-align: center;
+}
+
+form {
+    margin-top: 50px;
+    padding: 30px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
 }
