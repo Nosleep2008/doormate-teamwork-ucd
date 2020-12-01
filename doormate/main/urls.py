@@ -12,5 +12,5 @@ urlpatterns = [
     path('get_event/<time>',views.get_event),
     path('next_event/<time>',views.next_event),
     path('update_event/<summary>/<name>/<start_time>/<end_time>/<status>',views.update_event),
-    path('bot/<chat_id>/<text>', views.telegram_message)
+    path('bot/<text>', views.telegram_message)
 ]

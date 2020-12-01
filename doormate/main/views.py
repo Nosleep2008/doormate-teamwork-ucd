@@ -133,6 +133,9 @@ def update_event(request,summary,name,start_time,end_time,status):
         )
     return HttpResponse("Update success")
 
-def telegram_message(request,chat_id, text):
-    print(bot.getMe())
-    bot.sendMessage(chat_id, text)
+def telegram_message(request, text):
+    messages=bot.getUpdates()
+    for m in messages:
+        chat_id=m['message']['chat']['id']
+        bot.sendMessage(chat_id, text)
+    return HttpResponse("Text sent")
