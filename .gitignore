@@ -136,3 +136,6 @@ credentials.json
 
 # Node Modules
 node_modules
+
+# Jetbrains IDE
+.idea
