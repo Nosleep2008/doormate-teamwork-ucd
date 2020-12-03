@@ -50,21 +50,27 @@ def google_auth_code_handler(request):
     google_service = build_google_service(flow.credentials)
     calendars = list_calendars(google_service)
 
-    AuthInfo.objects.create(
-        email=profile["email"],
-        access_token=token["access_token"],
-        refresh_token=token["refresh_token"],
-        token_type=token["token_type"])
+    if AuthInfo.objects.count() == 1:
+        auth_info = AuthInfo.objects.first()
+        auth_info.email = profile["email"]
+        auth_info.access_token = profile["access_token"]
+        auth_info.refresh_token = profile["refresh_token"]
+        auth_info.token_type = profile["token_type"]
+    else:
+   
+        AuthInfo.objects.create(
+            email=profile["email"],
+            access_token=token["access_token"],
+            refresh_token=token["refresh_token"],
+            token_type=token["token_type"])
 
     return render(request, "index.html", {"form": CalendarsForm(calendars)})
-
 
 def index(request):
     return render(request, "index.html")
 
-
-def insert_event(request, summary, name, start_time, end_time, status):
-    start = datetime.strptime(start_time, '%Y-%m-%d %H:%M').astimezone()
+def insert_event(request,summary,name,start_time,end_time,status):
+    start = datetime.strptime(start_time,'%Y-%m-%d %H:%M').astimezone()
     end = datetime.strptime(end_time, '%Y-%m-%d %H:%M').astimezone()
 
     Events.objects.create(
@@ -77,41 +83,37 @@ def insert_event(request, summary, name, start_time, end_time, status):
 
     return HttpResponse("Insert success")
 
-
-def show_event(request, start_time, end_time):
+def show_event(request,start_time,end_time):
     start = datetime.strptime(start_time, '%Y-%m-%d %H:%M').astimezone()
     end = datetime.strptime(end_time, '%Y-%m-%d %H:%M').astimezone()
     events = Events.objects.filter(start_time__gte=start).filter(end_time__lte=end).order_by("start_time")
-    # print(events)
-    result = {}
-    result["events"] = list(events.values())
+    #print(events)
+    result={}
+    result["events"]=list(events.values())
     return JsonResponse(result)
 
-
-def get_event(request, time):
-    current = datetime.strptime(time, '%Y-%m-%d %H:%M').astimezone()
+def get_event(request,time):
+    current =  datetime.strptime(time, '%Y-%m-%d %H:%M').astimezone()
     events = Events.objects.filter(start_time__lte=current).filter(end_time__gte=current).order_by("start_time")
     result = {}
-    # print(list(events.values()))
+    #print(list(events.values()))
     result["events"] = list(events.values())
     return JsonResponse(result)
 
-
-def next_event(request, time):
+def next_event(request,time):
     current = datetime.strptime(time, '%Y-%m-%d %H:%M').astimezone()
-    result = {}
-    events = Events.objects.filter(start_time__gte=current).order_by("start_time")
-    result["next"] = list(events.values())[0]
-    # print(result["next"])
+    result={}
+    events=Events.objects.filter(start_time__gte=current).order_by("start_time")
+    result["next"]= list(events.values())[0]
+    #print(result["next"])
     return JsonResponse(result)
 
-
-def del_event(request, summary):
+def del_event(request,summary):
     Events.objects.get(summary=summary).delete()
-    return HttpResponse("Delete success")
+    return  HttpResponse("Delete success")
 
 
-def update_event(request, summary, name, start_time, end_time, status):
+def update_event(request,summary,name,start_time,end_time,status):
     events = Events.objects.filter(summary=summary)
     start = datetime.strptime(start_time, '%Y-%m-%d %H:%M').astimezone()
     end = datetime.strptime(end_time, '%Y-%m-%d %H:%M').astimezone()
@@ -132,7 +134,9 @@ def update_event(request, summary, name, start_time, end_time, status):
         )
     return HttpResponse("Update success")
 
-
-def telegram_message(request, chat_id, text):
-    print(bot.getMe())
-    bot.sendMessage(chat_id, text)
+def telegram_message(request, text):
+    messages=bot.getUpdates()
+    for m in messages:
+        chat_id=m['message']['chat']['id']
+        bot.sendMessage(chat_id, text)
+    return HttpResponse("Text sent")
