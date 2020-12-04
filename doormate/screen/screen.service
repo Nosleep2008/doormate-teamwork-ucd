@@ -1,0 +1,10 @@
+[Unit]
+Description=Screen Updater
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+ExecStart=/usr/bin/python3 /home/pi/screen.py
+
+[Install]
+WantedBy=multi-user.target

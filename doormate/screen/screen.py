@@ -34,28 +34,36 @@ def on_message(client, userdata, msg):
 
     payload = json.loads(msg.payload)
 
-    update(payload["name"], payload["datetime"], payload["type"])
+    update(payload["type"], payload["name"], payload["datetime"])
 
-def update(name, timestamp, event_type):
+def update(event_type, name=None, timestamp=None):
     """ Updates screen given name, timestamp and event_type """
-    timestamp = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S")
 
     image1 = Image.new("RGB", (disp.width, disp.height), "WHITE")
     draw = ImageDraw.Draw(image1)
 
-    DO_NOT_DISTURB = "DO NOT DISTURB"
+
+    DOORMATE = "DoorMate"
     if event_type == "end":
         STATUS = "Status: Available"
         AVAILABLE = ""
+        logo = "check.png"
     else:
+        timestamp = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S")
         STATUS = "Status: %s" % name
         AVAILABLE = "Available at %s" % timestamp.strftime("%H:%M")
+        logo = "close.png"
+
+    image = Image.open(logo)
+    image = image.resize((60,60))
+
+    image1.paste(image, (120-image.size[0]//2,150))
+    
+    font = ImageFont.truetype("arial.ttf", 22)
+    size = font.font.getsize(DOORMATE)
+    draw.text((120-size[0][0]//2, 30), DOORMATE, fill = "BLACK", font=font)
 
     font = ImageFont.truetype("arial.ttf", 18)
-    size = font.font.getsize(DO_NOT_DISTURB)
-    draw.text((120-size[0][0]//2, 30), DO_NOT_DISTURB, fill = "BLACK", font=font)
-
-    font = ImageFont.truetype("arial.ttf", 12)
     draw.text((disp.width//10, 90),  STATUS, fill="BLACK", font=font)
     draw.text((disp.width//10, 120), AVAILABLE, fill="BLACK", font=font)
 
@@ -63,6 +71,8 @@ def update(name, timestamp, event_type):
     disp.ShowImage(image1,0,0)
 
 if __name__ == "__main__":
+    update(event_type="end")
+
     client = mqtt.Client()
     client.on_connect = on_connect
     client.on_message = on_message
