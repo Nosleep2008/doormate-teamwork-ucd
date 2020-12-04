@@ -7,7 +7,7 @@ import pytz
 from apscheduler.schedulers.background import BlockingScheduler
 
 #from paho import mqtt
-from main.Event_Util import old_event, show_event, update_event
+from main.Event_Util import old_event, show_event, update_event, get_calendars, order_events_for_calendars
 from main.utils import list_events
 
 
@@ -30,7 +30,7 @@ class event_fetcher:
     def run(self, time_limit):
         while time_limit > 3600:
             time.sleep(10)
-            self.display_current_event()  # every 10 sec
+            self.display_event()  # every 10 sec
             if time_limit % 12 == 0:  # every 2 min
                 self.update_database()
             if time_limit % 3600 == 0:  # every 10 hour
@@ -39,16 +39,23 @@ class event_fetcher:
     '''
 
     def get_events_from_api(self):
-        res = list_events(self.service, self.calendar)
-        return res["items"]
+        calendars = get_calendars()
+        calendar_events = []
+        for c in calendars:
+            res = list_events(self.service, self.calendar)
+            calendar_events.append(res["items"])
+
+        events = order_events_for_calendars(calendar_events)
+
+        return events        
 
     def clear_passed_events(self):
         now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         old_event(now)
 
-    def display_current_event(self, summary, end_time):
+    def display_event(self, summary, end_time, event_type="start"):
         print("Sending current event...")
-        event = {"name": summary, "datetime": end_time}
+        event = {"name": summary, "datetime": end_time, "type": event_type}
         self.publish_message(json.dumps(event))
 
     def update_database(self):
@@ -69,12 +76,20 @@ class event_fetcher:
                     message_datetime = datetime.now() + timedelta(seconds=5)
 
                 self.scheduler.add_job(
-                    self.display_current_event,
-                    id="display_current_event",
+                    self.display_event,
+                    id="display_event",
                     replace_existing=True,
                     trigger='date',
                     run_date=message_datetime,
-                    args=(summary, end_time))
+                    args=(summary, event["end"]["dateTime"]))
+                
+                self.scheduler.add_job(
+                    self.display_event,
+                    id="remove_current_event",
+                    replace_existing=True,
+                    trigger='date',
+                    run_date=end_time,
+                    args=(summary, event["end"]["dateTime"], "end"))
 
             update_event("r", summary, summary, start_time, end_time, status)
 
