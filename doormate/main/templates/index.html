@@ -29,11 +29,17 @@
         </div>
         <!---insert event form----->
 
-        <form action="/insert_event/<name>/<start_time>/<end_time>/<status>/" method="post">
-            {% csrf_token %}
-            {{ form }}
-            <input type="submit" value="Submit">
-        </form>
+        {% if not authenticated %}
+            <a href="/google_auth_redirect">Log into Google</a>
+        {% elif form %}
+            <form action="/save_calendar/" method="post">
+                {% csrf_token %}
+                {{ form }}
+                <input type="submit" value="Submit">
+            </form>
+        {% else %}
+            <span>All set up! You can now start adding events to your calendars.</span>
+        {% endif %}
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12" id="footer">

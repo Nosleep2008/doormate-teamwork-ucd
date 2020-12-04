@@ -4,7 +4,7 @@ from django.http.response import JsonResponse
 import requests
 from django.contrib.auth import logout
 from main.forms import CalendarsForm
-from main.models import AuthInfo, Events
+from main.models import AuthInfo, Events, Calendars
 from google_auth_oauthlib.flow import Flow
 from django.core.exceptions import PermissionDenied
 from main.utils import list_calendars, list_events, build_google_service, get_user_profile
@@ -53,9 +53,9 @@ def google_auth_code_handler(request):
     if AuthInfo.objects.count() == 1:
         auth_info = AuthInfo.objects.first()
         auth_info.email = profile["email"]
-        auth_info.access_token = profile["access_token"]
-        auth_info.refresh_token = profile["refresh_token"]
-        auth_info.token_type = profile["token_type"]
+        auth_info.access_token = token["access_token"]
+        auth_info.refresh_token = token["refresh_token"]
+        auth_info.token_type = token["token_type"]
     else:
    
         AuthInfo.objects.create(
@@ -64,7 +64,15 @@ def google_auth_code_handler(request):
             refresh_token=token["refresh_token"],
             token_type=token["token_type"])
 
-    return render(request, "index.html", {"form": CalendarsForm(calendars)})
+    return render(request, "index.html", {"form": CalendarsForm(calendars), "authenticated": True})
+
+def save_calendar(request):
+    if request.method == 'POST':
+        calendars = request.POST.getlist('calendars')
+        for c in calendars:
+            Calendars.objects.create(calendar_id=c)
+        return render(request, "index.html", {"authenticated": True})
+    return HttpResponse(status=400)
 
 def index(request):
     return render(request, "index.html")
