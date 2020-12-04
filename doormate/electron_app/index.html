@@ -3,6 +3,13 @@
 <head>
     <style>
         /* Loader from https://www.w3schools.com/howto/howto_css_loader.asp */
+        body {
+            background-image: url('background.png');
+            background-repeat: no-repeat;
+            background-size: cover;
+            padding-top: 100px;
+        }
+
         .loader {
           margin: 0 auto;
           border: 16px solid #f3f3f3;
@@ -46,14 +53,20 @@
                 var textnode = document.createTextNode(service.name + " (" + service.addresses[0] + ")");
                 nodeService.appendChild(textnode);
                 nodeService.addEventListener('click', function() {
-                    ipcRenderer.send('open-tab', "http://" + service.addresses[0] + ":" + service.port);
+
+                    // Open in electron: ipcRenderer.send('open-tab', "http://" + service.addresses[0] + ":" + service.port);
+
+                    // Open in browser:
+                    const { shell } = require('electron')
+                    shell.openExternal("http://" + service.addresses[0] + ":" + service.port);
+                    // shell.openExternal("http://127.0.0.1:8000"); For testing
                 });
                 list.appendChild(nodeService);
             }
         });
     </script>
 </head>
-<body style="background: white;">
+<body>
     <div style="display: flex; justify-content: center; margin-top: 100px;">
         <div>
             <div id="spinner" class="loader"></div>
