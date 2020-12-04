@@ -22,8 +22,8 @@ def on_message_event(client, userdata, msg):
     print(msg.payload)
 
     for name in PRESENT_DEVICES_CONFIDENCE:
-        if PRESENT_DEVICES_CONFIDENCE[name] > 80:
-            time = datetime.strptime(payload["datetime"], "%Y-%m-%dT%H:%M:%S")
+        if PRESENT_DEVICES_CONFIDENCE[name] > 80 and payload["type"] != "end":
+            time = datetime.strptime(payload["datetime"], "%Y-%m-%dT%H:%M:%S%z")
             message_device(name, time)
 
 def on_message_presence(client, userdata, msg):
